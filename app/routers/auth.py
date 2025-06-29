@@ -5,6 +5,7 @@ from datetime import timedelta
 import secrets
 from app.database import get_db
 from app.models.user import User
+from app.models.organization import Organization
 from app.schemas.user import UserCreate, UserLogin, UserResponse, Token
 from app.utils.auth import (
     verify_password, 
@@ -27,12 +28,22 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
             detail=f"The user with email {user.email} already exists"
         )
     
-    # Create new user
+    # Get all organizations for follows initialization (matching MongoDB behavior)
+    organizations = db.query(Organization).all()
+    follows = []
+    for org in organizations:
+        follows.append({
+            "companyId": org.id,
+            "opinions": []
+        })
+    
+    # Create new user with MongoDB-compatible structure
     verification_token = secrets.token_urlsafe(32)
     hashed_password = get_password_hash(user.password)
     
     db_user = User(
         name=user.name,
+        last_name=user.last_name,
         email=user.email,
         password=hashed_password,
         verification_token=verification_token,
@@ -40,7 +51,9 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
             "big": "",
             "medium": "",
             "small": "https://s3.amazonaws.com/complaints-wespeak/Users/Tester/avatar.png"
-        }
+        },
+        follows=follows,  # Initialize with all organizations
+        payment={}  # Empty payment object
     )
     
     db.add(db_user)
@@ -81,9 +94,78 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
         "user": UserResponse.from_orm(db_user)
     }
 
+@router.post("/welisten/login", response_model=dict)
+async def welisten_login(user: UserLogin, db: Session = Depends(get_db)):
+    """Premium user login for WeListen dashboard"""
+    db_user = db.query(User).filter(User.email == user.email).first()
+    
+    if not db_user or not verify_password(user.password, db_user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect credentials"
+        )
+    
+    # Check if user is premium and has payment info
+    if db_user.kind == 1 and db_user.payment and db_user.payment.get("customerId"):
+        # Premium user with valid payment
+        # Find organization where user is admin
+        org = db.query(Organization).filter(
+            Organization.admins.contains([db_user.id])
+        ).first()
+        
+        access_token = create_access_token(
+            data={
+                "sub": db_user.email, 
+                "id": db_user.id, 
+                "kind": db_user.kind,
+                "companyId": org.id if org else None
+            }
+        )
+        
+        return {
+            "user": UserResponse.from_orm(db_user),
+            "token": access_token,
+            "dbOrg": org
+        }
+    elif db_user.kind == 0 and db_user.payment and db_user.payment.get("subscriptionId"):
+        # Regular user with subscription
+        return {
+            "user": UserResponse.from_orm(db_user),
+            "temp": True
+        }
+    
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Unauthorized"
+    )
+
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
     return UserResponse.from_orm(current_user)
+
+@router.get("/welisten/me", response_model=dict)
+async def get_current_premium_user_info(current_user: User = Depends(get_current_user)):
+    """Get current premium user info for WeListen dashboard"""
+    if current_user.kind == 1:
+        # Premium user
+        org = db.query(Organization).filter(
+            Organization.admins.contains([current_user.id])
+        ).first()
+        
+        return {
+            "user": UserResponse.from_orm(current_user),
+            "org": org
+        }
+    elif current_user.kind == 0 and current_user.payment and current_user.payment.get("subscriptionId"):
+        return {
+            "user": UserResponse.from_orm(current_user),
+            "temp": True
+        }
+    
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid JWT token"
+    )
 
 @router.get("/email-verification")
 async def verify_email(verificationToken: str, db: Session = Depends(get_db)):
