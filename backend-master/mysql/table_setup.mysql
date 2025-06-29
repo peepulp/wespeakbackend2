@@ -1,0 +1,109 @@
+use wespeakwelisten;
+drop table if exists companies;
+drop table if exists complaints;
+drop table if exists complaints_history;
+drop table if exists replies;
+drop table if exists images;
+drop table if exists chats;
+drop table if exists chat_messages;
+drop table if exists chat_companies;
+
+create table companies
+(
+    id int(11) NOT NULL auto_increment,
+    name varchar(255),
+    image text,
+    PRIMARY KEY(id)
+);
+
+create table complaints
+(
+    id int(11) NOT NULL auto_increment,
+    user_id int(11) NOT NULL DEFAULT -1,
+    company_id int(11) NOT NULL,
+    subject varchar(255),
+    author varchar(255),
+    created_by int(11),
+    topic varchar(255),
+    time timestamp,
+    created timestamp,
+    finished timestamp,
+    location varchar(255),
+    state enum('submitted','opened','responded','unresolved','resolved','reimbursed'),
+    state_dates json,
+    hashtags json,
+    anonymous boolean,
+    reimbursement boolean,
+    reimbursement_amount decimal(10,2),
+    waiting_timer boolean,
+    twitter boolean,
+    facebook_shares json,
+    twitter_shares json,
+    speaks_shares json,
+    views json,
+    reopen boolean,
+    mood enum('ok', 'slightly_mad', 'on_fire'),
+    angry_level decimal(2,1),
+    message text,
+    description text,
+    PRIMARY KEY(id)
+);
+
+create table complaints_history
+(
+    id int(11) NOT NULL auto_increment,
+    complaint_id int(11),
+    date timestamp,
+    message text,
+    PRIMARY KEY(id)
+);
+
+create table replies
+(
+    id int(11) NOT NULL auto_increment,
+    complaint_id int(11) NOT NULL,
+    message text,
+    sent timestamp,
+    PRIMARY KEY(id)
+);
+
+create table images
+(
+    id int(11) NOT NULL auto_increment,
+    src varchar(255),
+    complaint_id int(11),
+    PRIMARY KEY(id)
+);
+
+create table chats
+(
+    id int(11) NOT NULL auto_increment,
+    complaint_id int(11),
+    company_id int(11),
+    title varchar(255),
+    last_message_date timestamp(6),
+    user_id int(11),
+    is_read_by_user boolean,
+    PRIMARY KEY(id)
+);
+
+create table chat_messages
+(
+    id int(11) NOT NULL auto_increment,
+    chat_id int(11),
+    user_id text,
+    admin_user_id int(11),
+    organization_of_admin int(11),
+    message text,
+    sent_date timestamp(6),
+    PRIMARY KEY(id)
+);
+
+create table chat_companies
+(
+    id int(11) NOT NULL auto_increment,
+    chat_id int(11),
+    company_id int(11),
+    is_read_by_admin boolean,
+    PRIMARY KEY(id)
+);

@@ -1,0 +1,5 @@
+use wespeakwelisten;
+ALTER TABLE `complaints` MODIFY `state` ENUM('submitted','delivered','processed','unresolved','resolved','reimbursed','opened','responded');
+UPDATE `complaints` SET `state`='opened' WHERE `state`='delivered';
+UPDATE `complaints` SET `state`='responded' WHERE `state`='processed';
+ALTER TABLE `complaints` MODIFY `state` ENUM('submitted','opened','responded','unresolved','resolved','reimbursed');

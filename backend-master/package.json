@@ -1,0 +1,95 @@
+{
+  "name": "wespeak-backend",
+  "version": "2.0.0",
+  "description": "Express-restful server of wespeak organization",
+  "main": "./src/server.js",
+  "scripts": {
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "commit": "git-cz",
+    "create-db-container": "sudo docker run -d -p 27017:27017 -v ~/data:/data/db --restart unless-stopped mongo",
+    "eslint": "./node_modules/.bin/eslint .",
+    "eslint-fix": "./node_modules/.bin/eslint --fix .",
+    "start": "node ./src/server.js",
+    "start-dev": "NODE_ENV=dev PORT=3000 MONGO_URL='mongodb://localhost:27017/development-database' nodemon ./src/server.js",
+    "start-dev-debug": "NODE_ENV=dev PORT=3000 MONGO_URL='mongodb://localhost:27017/development-database' node --inspect ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "precommit": "npm run eslint",
+    "prepush": "npm run eslint",
+    "lint": "node_modules/.bin/goodparts path/to/files/for/linting"
+  },
+  "author": {
+    "name": "Ignacio Justicia Ramos",
+    "email": "ignaciojusticia@gmail.com"
+  },
+  "contributors": [
+    {
+      "name": "Jesús Moya Ávalos",
+      "email": "jesusmoyaavalos@gmail.com"
+    }
+  ],
+  "license": "GNU",
+  "dependencies": {
+    "aws-sdk": "^2.209.0",
+    "base64-img": "^1.0.4",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "email-validator": "^1.1.1",
+    "email-verification": "^0.4.6",
+    "express": "^4.16.2",
+    "express-boom": "^2.0.0",
+    "express-logger": "0.0.3",
+    "express-session": "^1.15.6",
+    "getconfig": "^4.1.0",
+    "js-base64": "^2.4.3",
+    "jsonwebtoken": "^7.4.3",
+    "lodash": "^4.17.4",
+    "mongoose": "^4.13.9",
+    "mongoose-deep-populate": "^3.1.1",
+    "mongoose-double": "0.0.1",
+    "mongoose-merge-plugin": "0.0.5",
+    "morgan": "^1.10.0",
+    "morgan-body": "^2.6.4",
+    "multiparty": "^4.1.3",
+    "mysql-async-simple": "^1.0.3",
+    "mysql2": "^2.3.3",
+    "node-schedule": "^1.3.0",
+    "nodemailer": "^4.4.2",
+    "nunjucks": "^3.0.1",
+    "object.omit": "^3.0.0",
+    "passport": "^0.4.0",
+    "passport-facebook": "^2.1.1",
+    "passport-google-oauth20": "^1.0.0",
+    "passport-twitter": "^1.0.4",
+    "randomstring": "^1.1.5",
+    "request": "^2.85.0",
+    "sharp": "^0.20.1",
+    "socket.io": "^2.1.0",
+    "stripe": "^6.1.0",
+    "vader-sentiment": "^1.1.3"
+  },
+  "devDependencies": {
+    "commitizen": "^2.9.6",
+    "cz-conventional-changelog": "^2.1.0",
+    "eslint": "^4.15.0",
+    "eslint-plugin-node": "^5.2.1",
+    "goodparts": "^1.2.1",
+    "husky": "^0.14.3",
+    "nodemon": "^1.14.11"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "keywords": [
+    "express",
+    "nodejs",
+    "jwt",
+    "authentication",
+    "backend",
+    "restful-api"
+  ]
+}
