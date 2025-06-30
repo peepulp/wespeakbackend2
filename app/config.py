@@ -16,7 +16,7 @@ class Settings:
     SMTP_USER: str = config("SMTP_USER")
     SMTP_PASSWORD: str = config("SMTP_PASSWORD")
     
-    # AWS S3
+    # AWS S3 - Fixed the environment variable name
     AWS_ACCESS_KEY_ID: str = config("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY: str = config("AWS_SECRET_ACCESS_KEY")
     AWS_BUCKET_NAME: str = config("AWS_BUCKET_NAME")

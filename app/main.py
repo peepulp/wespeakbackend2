@@ -4,7 +4,6 @@ import asyncio
 from app.routers import auth, data, users, organizations, complaints, chat, payment
 from app.utils.social_auth import router as social_auth_router
 from app.database import engine, Base
-from app.utils.scheduler import start_scheduler
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -46,7 +45,11 @@ async def health_check():
 async def startup_event():
     """Start background tasks"""
     # Start the statistics update scheduler
-    asyncio.create_task(start_scheduler())
+    try:
+        from app.utils.scheduler import start_scheduler
+        asyncio.create_task(start_scheduler())
+    except ImportError:
+        print("Scheduler not available, skipping background tasks")
 
 if __name__ == "__main__":
     import uvicorn
